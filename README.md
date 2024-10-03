@@ -3,7 +3,7 @@ Log in with LINE
   เป็น Module ที่ติดตั้งแล้วจะเชื่อมโยงการ Login (Frontend) โดยผ่าน LINE Log in ปัจจุบันใช้ API 2.1
 
 ก่อนติดตั้ง Module:
-  pip instsall pyjwt
+  pip install pyjwt
 
 LINE Dependency
   1. https://developers.line.biz (ต้องสร้าง Provider, Line Login)
