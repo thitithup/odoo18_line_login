@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+# See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.auth_oauth.controllers.main import OAuthLogin, OAuthController, fragment_to_query_string
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome
@@ -25,11 +25,6 @@ import base64
 _logger = logging.getLogger(__name__)
 
 
-# LINE_REDIRECT_URL = 'http://ineco.ngrok.io/auth_oauth/signin'
-# LINE_CLIENT_ID = '1654663761'
-# LINE_CLIENT_SECRET = '0ca6584f22338d797fe71bd35e9acd83'
-
-
 class AuthSignupHome(AuthSignupHome):
     @http.route('/web/signup', type='http', auth='public', website=True, sitemap=False)
     def web_auth_signup(self, *args, **kw):
@@ -40,7 +35,7 @@ class AuthSignupHome(AuthSignupHome):
         if 'error' not in qcontext and request.httprequest.method == 'POST':
             try:
                 self.do_signup(qcontext)
-                # Send an account creation confirmation email
+
                 if qcontext.get('token'):
                     user_sudo = request.env['res.users'].sudo().search([('login', '=', qcontext.get('login'))])
                     template = request.env.ref('auth_signup.mail_template_user_signup_account_created',
@@ -51,7 +46,7 @@ class AuthSignupHome(AuthSignupHome):
                             auth_login=werkzeug.url_encode({'auth_login': user_sudo.email}),
                         ).send_mail(user_sudo.id, force_send=True)
                 else:
-                    # สร้างแล้วไม่ให้ Login Auto
+
                     request.session.logout()
                     user_sudo = request.env['res.users'].sudo().search([('login', '=', qcontext.get('login'))])
                     template = request.env.ref('auth_line.mail_template_user_signup_account_activate',
@@ -61,9 +56,7 @@ class AuthSignupHome(AuthSignupHome):
                             lang=user_sudo.lang,
                             auth_login=werkzeug.url_encode({'auth_login': user_sudo.email}),
                         ).send_mail(user_sudo.id, force_send=True)
-                        # เหลือเขียน In Active res.users ที่พึ่งสร้างใหม่
                         user_sudo.set_inactivate()
-                        #
                     return werkzeug.utils.redirect('/web/login', 303)
                 return self.web_login(*args, **kw)
             except UserError as e:
@@ -108,7 +101,6 @@ class OAuthLogin(OAuthLogin):
                     nonce=base64.urlsafe_b64encode(os.urandom(16)),
                     # nonce=base64.urlsafe_b64encode(os.urandom(16)),
                 )
-            # provider['auth_link'] = "%s?%s" % (provider['auth_endpoint'], werkzeug.url_encode(params))
             provider['auth_link'] = "%s?%s" % (provider['auth_endpoint'], werkzeug.urls.url_encode(params))
         return providers
 
@@ -117,8 +109,6 @@ class OAuthController(OAuthController):
     @http.route('/auth_oauth/signin', type='http', auth='none')
     @fragment_to_query_string
     def signin(self, **kw):
-        # kw {'code': '74volZkvR20ru6r0Is6e',
-        # 'state': '{"d": "WEB1701", "p": 4, "r": "http%3A%2F%2Fmacm2.ineco.co.th%2Fweb"}'}
         state = json.loads(kw['state'])
         dbname = state['d']
         if not http.db_filter([dbname]):
@@ -127,12 +117,8 @@ class OAuthController(OAuthController):
         ensure_db(db=dbname)
         request.update_context(**clean_context(state.get('c', {})))
 
-        context = state.get('c', {})
-        # registry = registry_get(dbname)
-
         provider_obj = request.env['auth.oauth.provider'].sudo().browse(provider)
         if provider_obj.is_line_oauth == True:
-            # หา Token จาก Line มาเลย
             header = {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
@@ -150,21 +136,8 @@ class OAuthController(OAuthController):
             kw['id_token'] = result['id_token']
             kw['access_token'] = result['access_token']
 
-            id_token = kw['id_token']
-            decoded_id_token = jwt.decode(id_token,
-                                          provider_obj.line_secret,
-                                          audience=provider_obj.client_id,
-                                          issuer='https://access.line.me',
-                                          algorithms=['HS256'])
-            sample_output_decoded_id_token = {'iss': 'https://access.line.me', 'sub': 'Uac6aa4ae3c162aa89d3c44f8b7d1c4d3',
-                             'aud': '1654663761',
-                             'exp': 1727858579, 'iat': 1727854979, 'amr': ['linesso'], 'name': 'ธิติทัพพ์ ศรีสุขโข',
-                             'picture': 'https://profile.line-scdn.net/0hU065JfVvCh8LTCEpZj11SDcJBHJ8YgxXc34Sfy5NASZ2eEhMYywSKi5JVSpxehhJPyJMcShLUSkh',
-                             'email': 'k.pop@ineco.co.th'}
-
         try:
-            # auth_oauth may create a new user, the commit makes it
-            # visible to authenticate()'s own transaction below
+
             _, login, key = request.env['res.users'].with_user(SUPERUSER_ID).auth_oauth(provider, kw)
             request.env.cr.commit()
 
@@ -184,7 +157,6 @@ class OAuthController(OAuthController):
             resp = request.redirect(_get_login_redirect_url(auth_info['uid'], url), 303)
             resp.autocorrect_location_header = False
 
-            # Since /web is hardcoded, verify user has right to land on it
             if werkzeug.urls.url_parse(resp.location).path == '/web' and not request.env.user._is_internal():
                 resp.location = '/'
             return resp

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+# See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api, tools, SUPERUSER_ID
 from odoo.exceptions import AccessDenied, UserError
@@ -20,7 +20,6 @@ class ResUsers(models.Model):
         if oauth_provider.is_line_oauth:
             access_token = new_params.get('id_token')
             state = json.loads(params['state'])
-            # state['t'] = new_params.get('access_token')
             new_params['state'] = json.dumps(state)
         else:
             access_token = new_params.get('access_token')
@@ -42,11 +41,6 @@ class ResUsers(models.Model):
                                     audience=oauth_provider.client_id,
                                     issuer='https://access.line.me',
                                     algorithms=['HS256'])
-            validation_sample = {'iss': 'https://access.line.me', 'sub': 'Uac6aa4ae3c162aa89d3c44f8b7d1c4d3',
-                                 'aud': '1654663761',
-                                 'exp': 1727858579, 'iat': 1727854979, 'amr': ['linesso'], 'name': 'ธิติทัพพ์ ศรีสุขโข',
-                                 'picture': 'https://profile.line-scdn.net/0hU065JfVvCh8LTCEpZj11SDcJBHJ8YgxXc34Sfy5NASZ2eEhMYywSKi5JVSpxehhJPyJMcShLUSkh',
-                                 'email': 'k.pop@ineco.co.th'}
         else:
             validation = self._auth_oauth_rpc(oauth_provider.validation_endpoint, access_token)
             if validation.get("error"):
