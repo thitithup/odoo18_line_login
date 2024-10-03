@@ -1,4 +1,4 @@
-# odoo18_line_login
+# ODOO18 Log in with LINE
 Log in with LINE
   เป็น Module ที่ติดตั้งแล้วจะเชื่อมโยงการ Login (Frontend) โดยผ่าน LINE Log in ปัจจุบันใช้ API 2.1
 
