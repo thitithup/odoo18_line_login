@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="provider_ineco_line" model="auth.oauth.provider">
+            <field name="name">Line</field>
+            <field name="auth_endpoint">https://access.line.me/oauth2/v2.1/authorize</field>
+            <field name="scope">openid profile email</field>
+            <field name="validation_endpoint">https://api.line.me/oauth2/v2.1/verify</field>
+            <field name="css_class">fa fa-fw fa-sign-in</field>
+            <field name="body">Log in with LINE</field>
+            <field name="line_callback_uri">https://macm2.ineco.co.th/auth_oauth/signin</field>
+            <field name="line_secret">0ca6584f22338d797fe71bd35e9acd83</field>
+            <field name="client_id">1654663761</field>
+            <field name="is_line_oauth" eval="True"/>
+            <field name="enabled" eval="False"/>
+        </record>
+
+    </data>
+</odoo>
